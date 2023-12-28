@@ -4,7 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const sequelize = require("./services/db");
 const path = require("path");
-const webhookRouter = require("./routes/webhook.routes");
+const spreadsheetsRouter = require("./routes/spreadsheets.routes");
 
 const app = express();
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -34,7 +34,7 @@ const dbConnection = async () => {
 };
 
 app.get("/", (req, res) => res.send("server. Aliens made me do it :)"));
-app.use("/api/webhook", webhookRouter);
+app.use("/api/spreadsheets", spreadsheetsRouter);
 
 const serverStart = async () => {
   await dbConnection();
