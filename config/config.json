@@ -1,0 +1,32 @@
+{
+  "development": {
+    "username": "root",
+    "password": "dimadima",
+    "database": "resto_waves",
+    "host": "localhost",
+    "port": "3308",
+    "dialect": "mysql",
+    "socket": "/Applications/MAMP/tmp/mysql/mysql.sock",
+    "define": {
+      "id": false,
+      "freezeTableName": true,
+      "createdAt": false,
+      "updatedAt": false
+    },
+    "logging": false
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
