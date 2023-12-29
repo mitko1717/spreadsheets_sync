@@ -39,7 +39,7 @@ fs.readdirSync(`${__dirname}/../models/`)
   });
 
 function applyExtraSetup(sequelize) {
-  const {} = sequelize.models;
+  const { product } = sequelize.models;
 }
 
 applyExtraSetup(sequelize);

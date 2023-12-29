@@ -3,8 +3,8 @@ const LocalDbService = require("../services/localDb.service");
 class LocalDbController {
   async getAll(req, res) {
     try {
-      await LocalDbService.get();
-      res.status(200).send(`processed successfully`);
+      const data = await LocalDbService.getAll();
+      res.status(200).send(data);
     } catch (error) {
       console.error("Error handling LocalDb:", error);
       res.status(500).send("Internal server error");
@@ -13,8 +13,9 @@ class LocalDbController {
 
   async getOne(req, res) {
     try {
-      await LocalDbService.getOne();
-      res.status(200).send(`processed successfully`);
+      const { id } = req.params;
+      const data = await LocalDbService.getOne(id);
+      res.status(200).send(data);
     } catch (error) {
       console.error("Error handling LocalDb:", error);
       res.status(500).send("Internal server error");
@@ -23,18 +24,22 @@ class LocalDbController {
 
   async update(req, res) {
     try {
-      await LocalDbService.update();
-      res.status(200).send(`processed successfully`);
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const data = await LocalDbService.update(id, updateData);
+      res.status(200).send(data);
     } catch (error) {
       console.error("Error handling LocalDb:", error);
       res.status(500).send("Internal server error");
     }
   }
 
-  async getByProductSize(req, res) {
+  async getProductsBySize(req, res) {
     try {
-      await LocalDbService.getByProductSize();
-      res.status(200).send(`processed successfully`);
+      const { size } = req.params;
+      const data = await LocalDbService.getProductsBySize(size);
+      res.status(200).send(data);
     } catch (error) {
       console.error("Error handling LocalDb:", error);
       res.status(500).send("Internal server error");

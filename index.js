@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const sequelize = require("./services/db");
 const path = require("path");
 const spreadsheetsRouter = require("./routes/spreadsheets.routes");
+const localDbRouter = require("./routes/localDb.routes");
 
 const app = express();
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -35,6 +36,7 @@ const dbConnection = async () => {
 
 app.get("/", (req, res) => res.send("server. Aliens made me do it :)"));
 app.use("/api/spreadsheets", spreadsheetsRouter);
+app.use("/api/localDb", localDbRouter);
 
 const serverStart = async () => {
   await dbConnection();

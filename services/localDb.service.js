@@ -1,17 +1,31 @@
+const { models } = require("./db");
+
 class LocalDbService {
   async getAll() {
-    return true;
+    return await models.product.findAll();
   }
 
-  async getOne() {
-    return true;
+  async getOne(id) {
+    return await models.product.findAll({ where: { articleNumber: id } });
   }
 
-  async update() {
-    return true;
+  async update(id, newData) {
+    try {
+      const productToUpdate = await models.product.findOne({
+        where: { articleNumber: id },
+      });
+      if (!productToUpdate) throw new Error("Product not found");
+
+      await productToUpdate.update(newData);
+
+      return true;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      throw new Error("Failed to update product");
+    }
   }
 
-  async getByProductSize() {
+  async getProductsBySize(size) {
     return true;
   }
 }

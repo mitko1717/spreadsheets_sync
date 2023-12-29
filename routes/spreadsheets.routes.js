@@ -2,6 +2,6 @@ const express = require("express");
 const router = express.Router();
 const spreadsheetsController = require("../controllers/spreadsheets.controller");
 
-router.post("/", spreadsheetsController.get);
+router.get("/", spreadsheetsController.get);
 
 module.exports = router;
