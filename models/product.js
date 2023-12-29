@@ -31,13 +31,6 @@ const Product = (sequelize) =>
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: "[]",
-        // get() {
-        //   const sizes = this.getDataValue("sizes");
-        //   return sizes ? JSON.parse(sizes) : [];
-        // },
-        // set(val) {
-        //   this.setDataValue("sizes", JSON.stringify(val));
-        // },
       },
       category: {
         type: DataTypes.STRING,

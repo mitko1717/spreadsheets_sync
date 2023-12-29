@@ -4,7 +4,8 @@ const localDbController = require("../controllers/localDb.controller");
 
 router.get("/", localDbController.getAll);
 router.get("/:id", localDbController.getOne);
-router.get("/product/:size", localDbController.getProductsBySize);
+router.get("/size/:size", localDbController.getProductsBySize);
+router.get("/params", localDbController.getProductsByParams);
 router.put("/:id", localDbController.update);
 
 module.exports = router;

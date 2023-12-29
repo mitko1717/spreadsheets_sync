@@ -1,4 +1,4 @@
-const LocalDbService = require("../services/localDb.service");
+const LocalDbService = require("../services/localdb.service");
 
 class LocalDbController {
   async getAll(req, res) {
@@ -39,6 +39,21 @@ class LocalDbController {
     try {
       const { size } = req.params;
       const data = await LocalDbService.getProductsBySize(size);
+      res.status(200).send(data);
+    } catch (error) {
+      console.error("Error handling LocalDb:", error);
+      res.status(500).send("Internal server error");
+    }
+  }
+
+  async getProductsByParams(req, res) {
+    try {
+      const { brand, price, model, size } = req.query;
+
+      const params = { brand, price, model, size };
+
+      const data = await LocalDbService.getProductsByParams(params);
+
       res.status(200).send(data);
     } catch (error) {
       console.error("Error handling LocalDb:", error);

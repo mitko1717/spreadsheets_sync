@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { models } = require("./db");
 
 class LocalDbService {
@@ -7,6 +8,10 @@ class LocalDbService {
 
   async getOne(id) {
     return await models.product.findAll({ where: { articleNumber: id } });
+  }
+
+  async create(product) {
+    await models.product.create(product);
   }
 
   async update(id, newData) {
@@ -26,7 +31,64 @@ class LocalDbService {
   }
 
   async getProductsBySize(size) {
-    return true;
+    try {
+      const allProducts = await models.product.findAll();
+
+      // filter products based on the provided size
+      return allProducts.filter((product) => {
+        const sizes = JSON.parse(product.sizes);
+        return sizes[size];
+      });
+    } catch (error) {
+      console.error("Error retrieving products by size:", error);
+      throw error;
+    }
+  }
+
+  async getProductsByParams(params) {
+    const whereConditions = {};
+
+    if (params.brand) whereConditions.brand = params.brand;
+
+    if (params.price) {
+      const priceOperator = params.price.startsWith(">=")
+        ? Op.gte
+        : params.price.startsWith("<=")
+        ? Op.lte
+        : params.price.startsWith(">")
+        ? Op.gt
+        : params.price.startsWith("<")
+        ? Op.lt
+        : Op.eq;
+
+      whereConditions.price = {
+        [priceOperator]: parseFloat(params.price.replace(/^(>=?|<=?)/, "")),
+      };
+    }
+
+    if (params.model) {
+      whereConditions.model = {
+        [Op.like]: `%${params.model}%`,
+      };
+    }
+
+    try {
+      let filteredProducts = await models.product.findAll({
+        where: whereConditions,
+      });
+
+      if (params.size) {
+        filteredProducts = filteredProducts.filter((product) => {
+          const sizes = JSON.parse(product.sizes);
+          return sizes[params.size];
+        });
+      }
+
+      return filteredProducts;
+    } catch (error) {
+      console.error("Error retrieving products:", error);
+      throw error;
+    }
   }
 }
 

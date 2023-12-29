@@ -1,5 +1,5 @@
-const { models } = require("./db");
 const { google } = require("googleapis");
+const LocalDbService = require("./localdb.service");
 
 const API_KEY = process.env.API_KEY;
 const spreadsheetId = "1HJzKapn438dVT3vws2Ea7zG9FMmoKv8yE3GbQYvS6GU";
@@ -84,19 +84,24 @@ class SpreadsheetsService {
       for (const sheetName in allData) {
         const rows = allData[sheetName];
         for (const row of rows) {
+          // extract brand and model from name field
+          const modelNameMatches = row["Імя"].match(/Nike|Adidas/gi);
+          const brand = modelNameMatches ? modelNameMatches[0] : "";
+          const model = row["Імя"].replace(new RegExp(brand, "gi"), "").trim();
+
           const product = {
-            model: row["Імя"],
+            model: model,
             articleNumber: row["Код товару"] || Math.ceil(Math.random() * 1000),
             name: row["Імя"],
             price: parseFloat(row["Ціна"]),
             sizes: this.formatSizes(row),
             category: "",
             subcategory: "",
-            brand: "",
-            productModel: "",
+            brand: brand,
+            productModel: model,
           };
 
-          await models.product.create(product);
+          await LocalDbService.create(product);
         }
       }
       console.log("Products created successfully!");
