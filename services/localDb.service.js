@@ -55,7 +55,6 @@ class LocalDbService {
   }
 
   async updateSizes(articleNumber, newSizes) {
-    // console.log({ newSizes });
     try {
       const productToUpdate = await models.product.findOne({
         where: { articleNumber },
