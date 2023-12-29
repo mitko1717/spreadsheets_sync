@@ -35,10 +35,10 @@ class LocalDbController {
     }
   }
 
-  async getProductsBySize(req, res) {
+  async getBySize(req, res) {
     try {
       const { size } = req.params;
-      const data = await LocalDbService.getProductsBySize(size);
+      const data = await LocalDbService.getBySize(size);
       res.status(200).send(data);
     } catch (error) {
       console.error("Error handling LocalDb:", error);

@@ -1,5 +1,6 @@
 const { google } = require("googleapis");
 const LocalDbService = require("./localdb.service");
+const { formatData, formatSizes } = require("../helpers/formatting");
 
 const API_KEY = process.env.API_KEY;
 const spreadsheetId = "1HJzKapn438dVT3vws2Ea7zG9FMmoKv8yE3GbQYvS6GU";
@@ -16,12 +17,11 @@ class SpreadsheetsService {
 
       for (const sheetName of sheetNames) {
         const rows = await this.getDataFromSheet(spreadsheetId, sheetName);
-        const formattedData = this.formatData(rows);
+        const formattedData = formatData(rows);
 
         allData[sheetName] = formattedData;
       }
 
-      await this.processAndCreateProducts(allData);
       console.log("Formatted data for all sheets");
       return allData;
     } catch (error) {
@@ -30,27 +30,7 @@ class SpreadsheetsService {
     }
   }
 
-  formatData(rows) {
-    const length = Object.keys(rows[0]).length;
-    const formattedData = [];
-
-    // iterate through columns starting from B
-    for (let col = 1; col < length; col++) {
-      const columnData = {};
-
-      // iterate through rows and assign values using column A as keys
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const keyWithoutSpaces = row[0].trim();
-        columnData[keyWithoutSpaces] = row[col];
-      }
-
-      formattedData.push(columnData);
-    }
-
-    return formattedData;
-  }
-
+  // get tabs names in spreadsheet as string array
   async getSheetNames() {
     try {
       const spreadsheetId = "1HJzKapn438dVT3vws2Ea7zG9FMmoKv8yE3GbQYvS6GU";
@@ -79,49 +59,46 @@ class SpreadsheetsService {
     }
   }
 
-  async processAndCreateProducts(allData) {
+  // function for cron, for sync data from spreadsheet with local db
+  async processAndCreateProducts() {
+    console.log("start sync process");
+    const data = await this.get();
+
     try {
-      for (const sheetName in allData) {
-        const rows = allData[sheetName];
+      for (const sheetName in data) {
+        const rows = data[sheetName];
         for (const row of rows) {
-          // extract brand and model from name field
-          const modelNameMatches = row["Імя"].match(/Nike|Adidas/gi);
-          const brand = modelNameMatches ? modelNameMatches[0] : "";
-          const model = row["Імя"].replace(new RegExp(brand, "gi"), "").trim();
+          const articleNumber = +row["Код товару"];
+          console.log({ articleNumber });
 
-          const product = {
-            model: model,
-            articleNumber: row["Код товару"] || Math.ceil(Math.random() * 1000),
-            name: row["Імя"],
-            price: parseFloat(row["Ціна"]),
-            sizes: this.formatSizes(row),
-            category: "",
-            subcategory: "",
-            brand: brand,
-            productModel: model,
-          };
+          const existingProduct = await LocalDbService.getByArticleNumber(
+            articleNumber
+          );
 
-          await LocalDbService.create(product);
+          if (!existingProduct) {
+            console.log("creating product");
+            await LocalDbService.create(row);
+          } else {
+            console.log("product exists");
+            const existingSizes = JSON.parse(existingProduct.sizes);
+            const newSizes = formatSizes(row);
+            const mergedSizes = { ...existingSizes, ...JSON.parse(newSizes) };
+            console.log({ mergedSizes });
+
+            if (JSON.stringify(existingSizes) !== JSON.stringify(mergedSizes)) {
+              await LocalDbService.updateSizes(
+                articleNumber,
+                JSON.stringify(mergedSizes)
+              );
+              console.log(`Sizes updated for product ${articleNumber}`);
+            }
+          }
         }
       }
       console.log("Products created successfully!");
     } catch (error) {
       console.error("Error creating products:", error);
     }
-  }
-
-  formatSizes(obj) {
-    const sizes = {};
-
-    for (const key in obj) {
-      if (typeof key === "string" && !isNaN(parseInt(key))) {
-        obj[key] !== undefined && obj[key] !== ""
-          ? (sizes[key] = true)
-          : (sizes[key] = false);
-      }
-    }
-
-    return JSON.stringify(sizes);
   }
 }
 
